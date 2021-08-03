@@ -40,9 +40,13 @@ usagedir_length=${#usagedir} # Count the length of working directory above. Need
 usagedir_length=$((usagedir_length+2)) # Increment length from before because somehow it's wrong by 2. Don't ask me why.
 break_txt="*.txt" # String I need in list() to determine empty directory
 
-maxchar=266 # Maximum Character Cap per Page in Minecraft. Do not change.
-maxpage=999 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
+maxchar=255 # Maximum Character Cap per Page in Minecraft. Do not change.
+maxpage=100 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
+bookmin=1 # Minimum of books a document can take up
 pagetotal=0 # Set variable to count for total pages later on. It'll make more sense later.
+
+# Internal Declarations >>
+mousetimer=0 # I don't feel like explaining it
 
 mkdir -p $usagedir #Check if folder exists, create if not
 
@@ -93,7 +97,7 @@ textwork() {
   if [ -f "$compfile" ]; then # Check if user input exists, if yes...
     echo "$userfilename exists." # Tell us it exists.
     newline
-    sleep 0.5
+    sleep 0.1 # Before you judge me for sleeping for 0.1 second = My computer is slow. I need to give it a lil time
     echo "Please open Minecraft, then equip a Book & Quill."
     echo "Press Y to continue / Press C to cancel"
     read textworkinput1 # Wait for user input (Preferably Y or C), store in variable textworkinput1
@@ -119,8 +123,18 @@ textwork() {
 
 textwork2() {
   clear
-  echo "$compfile"
-  
+  echo "Counting Characters of $userfilename ..."
+  sleep 0.1 # Don't judge it's for compatibility reasons
+  line
+  total_chars=$(wc -c < $compfile)
+  total_chars=$(echo ${total_chars//[[:blank:]]/})
+  approx_pages=$((total_chars / maxchar))
+  approx_books=$((approx_pages / maxpage))
+
+  echo "$userfilename has $total_chars characters."
+  echo "$userfilename would take up $approx_pages pages."
+  echo "$userfilename would need $approx_books books."
+  newline
 }
 
 # Start >>
