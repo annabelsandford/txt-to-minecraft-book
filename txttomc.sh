@@ -33,7 +33,7 @@
 # Declarations >>
 
 author="Annabel Sandford" # Author of this abomination (me)
-progver="0.0.1" # Version number, also for the UI
+progver="0.0.2" # Version number, also for the UI
 progname="TXT to Minecraft Book & Quill" # Name of the program, for the UI
 usagedir=$HOME/Desktop/Bible # The working directory of this program. >> SAVE TXT's HERE <<
 usagedir_length=${#usagedir} # Count the length of working directory above. Needed later on.
@@ -58,6 +58,32 @@ line() { # A function to create these lines because I can't be bothered to CMD+C
 
 newline() { # A function to create new lines because why not
   echo " "
+}
+
+process_check() { # Get Minecraft Process ID (PID). Blatantly recycled from an old project of mine.
+  minecraft_pid=$(osascript -e 'tell application "System Events"
+  if application process "java" exists then
+  tell application "System Events"
+  return the unix id of (every process whose name contains "java")
+  end tell
+  else
+  return "NO-PID"
+  end if
+  end tell') # Runs an AppleScript above to get the PID and saves it as a shell variable
+  clear # Clear screen. Probably not necessary. Do it anyways.
+  if [ $minecraft_pid = "NO-PID" ] ; then
+    echo "$progname $progver\nWritten by: $author"
+    line
+  	echo "No Minecraft Process could be found."
+  	echo "Please start Minecraft first."
+  	read -n 1 -r -s -p $'Press any key to continue...\n'
+  	exit # Quit if no Minecraft process could be found
+  else
+    echo "$progname $progver\nWritten by: $author"
+    line
+  	echo "Minecraft Process ID: $minecraft_pid"
+  	read -n 1 -r -s -p $'Press any key to continue...\n' # Continue if there actually is a Minecraft process.
+  fi
 }
 
 list() { # List all files from working directory
@@ -98,7 +124,7 @@ textwork() {
     echo "$userfilename exists." # Tell us it exists.
     newline
     sleep 0.1 # Before you judge me for sleeping for 0.1 second = My computer is slow. I need to give it a lil time
-    echo "Please open Minecraft, then equip a Book & Quill."
+    echo "Do you want to continue with $compfile?\nThere's no going back.\n"
     echo "Press Y to continue / Press C to cancel"
     read textworkinput1 # Wait for user input (Preferably Y or C), store in variable textworkinput1
     textworkinput1=$(echo $textworkinput1 | tr 'A-Z' 'a-z') # Convert user input into lowercase for accessibility. Again.
@@ -135,34 +161,28 @@ textwork2() {
   echo "$userfilename would take up $approx_pages pages."
   echo "$userfilename would need $approx_books books."
   newline
+  echo "Press Y to continue / Press C to abort"
+  read textworkinput2 # Wait for user input (Preferably Y or C) we know the drill
+  textworkinput2=$(echo $textworkinput2 | tr 'A-Z' 'a-z') # Convert user input into lowercase for accessibility. 3rd time.
+  if [ "$textworkinput2" = "y" ]; then # If the input was Y, continue
+    textwork3
+  elif [ "$textworkinput2" = "c" ]; then # If the input was C, go back to list()
+    list # Why list() instead of just going back? Because I wanna be a subtle pain in the ass. That's why.
+  else # If the user entered something completely stupid, restart textwork2(). Like before.
+    echo "Unknown Command."
+    echo "Please try again"
+    sleep 3
+    textwork2
+  fi
+}
+
+textwork3() {
+  
 }
 
 # Start >>
 clear
-# Get Minecraft Process ID (PID)
-minecraft_pid=$(osascript -e 'tell application "System Events"
-if application process "java" exists then
-tell application "System Events"
-return the unix id of (every process whose name contains "java")
-end tell
-else
-return "NO-PID"
-end if
-end tell') # Runs an AppleScript to get the PID and saves it as a shell variable
-Clear
-if [ $minecraft_pid = "NO-PID" ] ; then
-  echo "$progname $progver\nWritten by: $author"
-  line
-	echo "No Minecraft Process could be found."
-	echo "Please start Minecraft first."
-	read -n 1 -r -s -p $'Press enter to continue...\n'
-	exit
-else
-  echo "$progname $progver\nWritten by: $author"
-  line
-	echo "Minecraft Process ID: $minecraft_pid"
-	read -n 1 -r -s -p $'Press enter to continue...\n'
-fi
+# process_check << DEBUG! Reactivate later. If I forgot to do it then I'm legally blind.
 list
-
+echo "If you see this, something went super-duper wrong. You shouldn't be able to see this."
 # The End <3
