@@ -139,6 +139,30 @@ textwork2() {
 
 # Start >>
 clear
+# Get Minecraft Process ID (PID)
+minecraft_pid=$(osascript -e 'tell application "System Events"
+if application process "java" exists then
+tell application "System Events"
+return the unix id of (every process whose name contains "java")
+end tell
+else
+return "NO-PID"
+end if
+end tell') # Runs an AppleScript to get the PID and saves it as a shell variable
+Clear
+if [ $minecraft_pid = "NO-PID" ] ; then
+  echo "$progname $progver\nWritten by: $author"
+  line
+	echo "No Minecraft Process could be found."
+	echo "Please start Minecraft first."
+	read -n 1 -r -s -p $'Press enter to continue...\n'
+	exit
+else
+  echo "$progname $progver\nWritten by: $author"
+  line
+	echo "Minecraft Process ID: $minecraft_pid"
+	read -n 1 -r -s -p $'Press enter to continue...\n'
+fi
 list
 
 # The End <3
