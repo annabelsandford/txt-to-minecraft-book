@@ -135,7 +135,6 @@ textwork() {
     else # If the user entered something completely stupid, restart textwork()
       echo "Unknown Command."
       echo "Please try again"
-      sleep 3
       textwork
     fi
   else # If entered file does not exist...
@@ -152,6 +151,7 @@ textwork2() {
   echo "Counting Characters of $userfilename ..."
   sleep 0.1 # Don't judge it's for compatibility reasons
   line
+  #tr -d '\n' < $compfile
   total_chars=$(wc -c < $compfile)
   total_chars=$(echo ${total_chars//[[:blank:]]/})
   approx_pages=$((total_chars / maxchar))
@@ -171,13 +171,23 @@ textwork2() {
   else # If the user entered something completely stupid, restart textwork2(). Like before.
     echo "Unknown Command."
     echo "Please try again"
-    sleep 3
     textwork2
   fi
 }
 
 textwork3() {
-  
+  entire_file="$(cat $compfile)" # Put the entire .txt file into a string
+  clear # Clear screen and stuff
+  for ((i=0;i<=approx_books;i++)); do # Until required amount of books is reached, do..
+    for ((ia=1;ia<=maxpage;ia++)); do # Repeat until maximum page cap is reached..
+      page_to_write=$(echo $entire_file | head -c $maxchar) # Put the first maximum characters of entire_file into a variable
+      echo $page_to_write # Give us those characters
+      entire_file=${entire_file:$maxchar} # Delete them from the entire_file string
+      newline
+      newline
+      sleep 3
+    done
+  done
 }
 
 # Start >>
