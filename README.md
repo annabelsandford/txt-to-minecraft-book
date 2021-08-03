@@ -4,6 +4,13 @@ A Shell script written on macOS to import any *.txt file into a Minecraft Book.
 
 The goal of this script is to determine how many Books are needed to import any given *.txt file into Minecraft. This is achieved by following Minecraft's strict character and page limitations. 
 
+## Prerequisites
+
+1. macOS Catalina 10.15 (or higher) because the script probably needs adjustments for Bash 3.0 (10.14 and below). If you can get it to run tho it should even run on OS X 10.5 / PowerPC. Though you might face problems running Minecraft then. You do you.
+2. AppleScript is being used too, though I cannot say whether the syntax and functions being used works on Versions below 10.15. You might have to try it out / tweak it.
+
+_I might work on a Python Version in the future. Until then: No Windows support. Go get Linux._
+
 ## Installation
 
 1. Download [txttomc.sh](https://choosealicense.com/licenses/mit/)
