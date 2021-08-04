@@ -34,8 +34,8 @@
 
 author="Annabel Sandford" # Author of this abomination (me)
 progver="0.0.2" # Version number, also for the UI
-progname="TXT to Minecraft Book & Quill" # Name of the program, for the UI
-usagedir=$HOME/Desktop/Bible # The working directory of this program. >> SAVE TXT's HERE <<
+progname="TXT to Minecraft Book & Quill" # Name of the script, for the UI
+usagedir=$HOME/Desktop/Bible # The working directory of this script. >> SAVE TXT's HERE <<
 usagedir_length=${#usagedir} # Count the length of working directory above. Needed later on.
 usagedir_length=$((usagedir_length+2)) # Increment length from before because somehow it's wrong by 2. Don't ask me why.
 break_txt="*.txt" # String I need in list() to determine empty directory
@@ -156,6 +156,7 @@ textwork2() {
   total_chars=$(echo ${total_chars//[[:blank:]]/})
   approx_pages=$((total_chars / maxchar))
   approx_books=$((approx_pages / maxpage))
+  approx_books=$((approx_books + 1)) # Somehow it's required. Don't ask why. I've found out thru extensive testing. Trust me.
 
   echo "$userfilename has $total_chars characters."
   echo "$userfilename would take up $approx_pages pages."
@@ -177,16 +178,41 @@ textwork2() {
 
 textwork3() {
   entire_file="$(cat $compfile)" # Put the entire .txt file into a string
+  entire_file=$(echo $entire_file | tr -d '\r') # Remove newlines because it fucks up the script yo
+  for ((i=1;i<=approx_books;i++)); do # Until required amount of books is reached, do..
   clear # Clear screen and stuff
-  for ((i=0;i<=approx_books;i++)); do # Until required amount of books is reached, do..
-    for ((ia=1;ia<=maxpage;ia++)); do # Repeat until maximum page cap is reached..
-      page_to_write=$(echo $entire_file | head -c $maxchar) # Put the first maximum characters of entire_file into a variable
-      echo $page_to_write # Give us those characters
-      entire_file=${entire_file:$maxchar} # Delete them from the entire_file string
-      newline
-      newline
-      sleep 3
-    done
+  echo "This is Book $i / $approx_books of $userfilename"
+  line
+  echo "Please open a Book & Quill. Place your cursor on the right page arrow."
+  echo "Press Y to continue / Press C to abort"
+  read textworkinput3 # Wait for user input
+  textworkinput3=$(echo $textworkinput3 | tr 'A-Z' 'a-z') # Convert user input into lowercase.
+  if [ "$textworkinput3" = "y" ]; then # input was Y, continue
+
+  # << WRITE TEXT TO MINECRAFT START
+
+  for ((ia=1;ia<=maxpage;ia++)); do # Repeat until maximum page cap is reached..
+  page_to_write=$(echo $entire_file | head -c $maxchar) # Put the first maximum characters of entire_file into a variable
+  if [[ -n "${page_to_write/[ ]*\n/}" ]]
+  then
+    echo $page_to_write # Give us those characters
+    newline
+    newline
+    entire_file=${entire_file:$maxchar} # Delete them from the entire_file string
+  else
+    break
+  fi
+  done
+
+  # >> WRITE TEXT TO MINECRAFT END
+
+  elif [ "$textworkinput3" = "c" ]; then # input was C, go back to list()
+    list
+  else
+    echo "Unknown Command."
+    echo "Please try again"
+    textwork2
+  fi
   done
 }
 
