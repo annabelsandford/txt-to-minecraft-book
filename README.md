@@ -6,16 +6,20 @@ The goal of this script is to determine how many Books are needed to import any 
 
 ## Prerequisites
 
-1. macOS Catalina 10.15 (or higher) because the script probably needs adjustments for Bash 3.0 (10.14 and below). If you can get it to run tho it should even run on OS X 10.5 / PowerPC. Though you might face problems running Minecraft then. You do you.
-2. AppleScript is being used too, though I cannot say whether the syntax and functions being used works on versions below 10.15. You might have to try it out / tweak it.
-3. Minecraft 1.17.1 - But you can adjust maxchar / maxpage values to fit any given version featuring Book & Quills.
+1. xdotool
+2. macOS Catalina 10.15 (or higher) because the script probably needs adjustments for Bash 3.0 (10.14 and below). If you can get it to run tho it should even run on OS X 10.5 / PowerPC. Though you might face problems running Minecraft then. You do you.
+3. AppleScript is being used too, though I cannot say whether the syntax and functions being used works on versions below 10.15. You might have to try it out / tweak it.
 
 _I might work on a Python version in the future. Until then: No Windows support. Go get Linux._
 
 ## Installation
 
-1. Download [txttomc.sh](https://choosealicense.com/licenses/mit/)
-2. Run via Terminal
+1. Download & install _xdotool_ by running the command below in Terminal
+2. ```bash
+3. brew install xdotool
+4. ```
+3. Download [txttomc.sh](https://choosealicense.com/licenses/mit/)
+4. Run via Terminal
 
 ## Modifying
 I have made a serious effort to declare as many dynamic variables in the beginning as possible, making it easier to tweak & play around with the script.
