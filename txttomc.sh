@@ -42,6 +42,7 @@ break_txt="*.txt" # String I need in list() to determine empty directory
 
 maxchar=255 # Maximum Character Cap per Page in Minecraft. Do not change.
 maxpage=100 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
+start_timer=15 # Timer until script kicks in after initializing it
 bookmin=1 # Minimum of books a document can take up
 pagetotal=0 # Set variable to count for total pages later on. It'll make more sense later.
 
@@ -188,6 +189,15 @@ textwork3() {
   read textworkinput3 # Wait for user input
   textworkinput3=$(echo $textworkinput3 | tr 'A-Z' 'a-z') # Convert user input into lowercase.
   if [ "$textworkinput3" = "y" ]; then # input was Y, continue
+  
+  for ((it=0;it<=start_timer;it++)); do
+    clear
+    echo "Book $i / $approx_books of $userfilename"
+    echo "Timer until script starts:"
+    line
+    echo "$it / $start_timer"
+    sleep 1
+  done
 
   # << WRITE TEXT TO MINECRAFT START
 
