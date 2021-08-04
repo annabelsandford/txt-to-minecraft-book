@@ -15,9 +15,9 @@ _I might work on a Python version in the future. Until then: No Windows support.
 ## Installation
 
 1. Download & install _xdotool_ by running the command below in Terminal
-2. ```bash
-3. brew install xdotool
-4. ```
+```bash
+brew install xdotool
+```
 3. Download [txttomc.sh](https://choosealicense.com/licenses/mit/)
 4. Run via Terminal
 
