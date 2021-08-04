@@ -189,7 +189,7 @@ textwork3() {
   read textworkinput3 # Wait for user input
   textworkinput3=$(echo $textworkinput3 | tr 'A-Z' 'a-z') # Convert user input into lowercase.
   if [ "$textworkinput3" = "y" ]; then # input was Y, continue
-  
+
   for ((it=0;it<=start_timer;it++)); do
     clear
     echo "Book $i / $approx_books of $userfilename"
@@ -224,6 +224,25 @@ textwork3() {
     textwork2
   fi
   done
+  book_fully_cooked_aye
+}
+
+book_fully_cooked_aye() {
+  echo "$userfilename done."
+  line
+  newline
+  echo "Press Y to go back / Press C to quit"
+  read textworkinput4
+  textworkinput2=$(echo $textworkinput2 | tr 'A-Z' 'a-z')
+  if [ "$textworkinput2" = "y" ]; then
+    list
+  elif [ "$textworkinput2" = "c" ]; then
+    exit
+  else
+    echo "Unknown Command."
+    echo "Please try again"
+    book_fully_cooked_aye
+  fi
 }
 
 # Start >>
