@@ -42,13 +42,14 @@ break_txt="*.txt" # String I need in list() to determine empty directory
 
 maxchar=255 # Maximum Character Cap per Page in Minecraft. Do not change.
 maxpage=100 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
-start_timer=15 # Timer until script kicks in after initializing it
+start_timer=5 # Timer until script kicks in after initializing it
 bookmin=1 # Minimum of books a document can take up
 pagetotal=0 # Set variable to count for total pages later on. It'll make more sense later.
 
 # Internal Declarations >>
 mousetimer=0 # I don't feel like explaining it
 
+gcc -o MouseLocation MouseLocation.m -framework AppKit
 mkdir -p $usagedir #Check if folder exists, create if not
 
 # Functions >>
@@ -180,6 +181,7 @@ textwork2() {
 textwork3() {
   entire_file="$(cat $compfile)" # Put the entire .txt file into a string
   entire_file=$(echo $entire_file | tr -d '\r') # Remove newlines because it fucks up the script yo
+  sleep 2
   for ((i=1;i<=approx_books;i++)); do # Until required amount of books is reached, do..
   clear # Clear screen and stuff
   echo "This is Book $i / $approx_books of $userfilename"
@@ -205,9 +207,21 @@ textwork3() {
   page_to_write=$(echo $entire_file | head -c $maxchar) # Put the first maximum characters of entire_file into a variable
   if [[ -n "${page_to_write/[ ]*\n/}" ]]
   then
-    echo $page_to_write # Give us those characters
+    clear
+    echo "Page $ia / $maxpage - Book $i"
+    line
+    page_to_write=${page_to_write//$'\r'}
+    page_to_write=${page_to_write//$'\n'}
+    echo "$page_to_write" | pbcopy # Give us those characters and copy to clipboard
+    echo $page_to_write
     newline
-    newline
+    # << MINECRAFT WRITE PAGE APPLESCRIPT START
+
+    osascript -e 'tell application "System Events" to keystroke (the clipboard)'
+    sleep 0.4
+    cliclick c:.
+    # >> MINECRAFT WRITE PAGE APPLESCRIPT START
+
     entire_file=${entire_file:$maxchar} # Delete them from the entire_file string
   else
     break
