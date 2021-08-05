@@ -2,7 +2,8 @@
 
 A Shell script written on macOS to import any *.txt file into a Minecraft Book. 
 
-The goal of this script is to determine how many Books are needed to import any given *.txt file into Minecraft. This is achieved by following Minecraft's strict character and page limitations. 
+The goal of this script is to determine how many books are needed to import any given *.txt file into Minecraft in order to import said *.txt into the game. This is achieved by following Minecraft's strict character and page limitations. 
+The script imports the text file's content into a local string, then proceeds to type it into the game piece by piece. The script also presses the next-page-button by using _cliclick_.
 
 ## Prerequisites
 
