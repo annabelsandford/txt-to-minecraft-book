@@ -33,7 +33,7 @@
 # Declarations >>
 
 author="Annabel Sandford" # Author of this abomination (me)
-progver="0.0.2" # Version number, also for the UI
+progver="0.0.3" # Version number, also for the UI
 progname="TXT to Minecraft Book & Quill" # Name of the script, for the UI
 usagedir=$HOME/Desktop/Bible # The working directory of this script. >> SAVE TXT's HERE <<
 usagedir_length=${#usagedir} # Count the length of working directory above. Needed later on.
@@ -212,13 +212,13 @@ textwork3() {
     line
     page_to_write=${page_to_write//$'\r'}
     page_to_write=${page_to_write//$'\n'}
+    echo "$page_to_write"
     echo "$page_to_write" | pbcopy # Give us those characters and copy to clipboard
-    echo $page_to_write
     newline
     # << MINECRAFT WRITE PAGE APPLESCRIPT START
 
     osascript -e 'tell application "System Events" to keystroke (the clipboard)'
-    sleep 0.4
+    sleep 1.5
     cliclick c:.
     # >> MINECRAFT WRITE PAGE APPLESCRIPT START
 
