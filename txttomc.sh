@@ -33,21 +33,23 @@
 # Declarations >>
 
 author="Annabel Sandford" # Author of this abomination (me)
-progver="0.0.3" # Version number, also for the UI
+progver="0.1.1" # Version number, also for the UI
 progname="TXT to Minecraft Book & Quill" # Name of the script, for the UI
 usagedir=$HOME/Desktop/Bible # The working directory of this script. >> SAVE TXT's HERE <<
 usagedir_length=${#usagedir} # Count the length of working directory above. Needed later on.
 usagedir_length=$((usagedir_length+2)) # Increment length from before because somehow it's wrong by 2. Don't ask me why.
 break_txt="*.txt" # String I need in list() to determine empty directory
 
-maxchar=255 # Maximum Character Cap per Page in Minecraft. Do not change.
-maxpage=100 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
+maxchar=200 # Maximum Character Cap per Page in Minecraft. Do not change.
+maxpage=35 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
 start_timer=5 # Timer until script kicks in after initializing it
 bookmin=1 # Minimum of books a document can take up
 pagetotal=0 # Set variable to count for total pages later on. It'll make more sense later.
 
 # Internal Declarations >>
+checkletters=[^a-zA-Z] # Letters for the Word Detection
 mousetimer=0 # I don't feel like explaining it
+worddetect=0 # Variable for Word Detection. Every time the script detects the character it's cutting off next is within a word, this goes up
 
 gcc -o MouseLocation MouseLocation.m -framework AppKit
 mkdir -p $usagedir #Check if folder exists, create if not
@@ -188,6 +190,9 @@ textwork3() {
   line
   echo "Please open a Book & Quill. Place your cursor on the right page arrow."
   echo "Press Y to continue / Press C to abort"
+  echo "DEBUG:"
+  echo "_MAXCHAR: $maxchar"
+  echo "_MAXCHAR_NEW: $maxchar_new"
   read textworkinput3 # Wait for user input
   textworkinput3=$(echo $textworkinput3 | tr 'A-Z' 'a-z') # Convert user input into lowercase.
   if [ "$textworkinput3" = "y" ]; then # input was Y, continue
@@ -204,10 +209,25 @@ textwork3() {
   # << WRITE TEXT TO MINECRAFT START
 
   for ((ia=1;ia<=maxpage;ia++)); do # Repeat until maximum page cap is reached..
-  page_to_write=$(echo $entire_file | head -c $maxchar) # Put the first maximum characters of entire_file into a variable
+
+  check_checker="NO LETTER"
+  maxchar_new=$maxchar
+  next_char_check=$(echo $entire_file | cut -c $maxchar)
+  if [[ "$next_char_check" =~ ^[0-9a-zA-Z]+$ ]]; then
+    check_checker=">> LETTER DET. / EXPANDING"
+    while [[ "$next_char_check" =~ ^[0-9a-zA-Z]+$ ]]; do
+      maxchar_new=$((maxchar_new+1))
+      check_checker=">> LETTER DET. / EXPANDING / WHILE"
+      next_char_check=$(echo $entire_file | cut -c $maxchar_new)
+    done
+  fi
+
+  page_to_write=$(echo $entire_file | head -c $maxchar_new) # Put the first maximum characters of entire_file into a variable
   if [[ -n "${page_to_write/[ ]*\n/}" ]]
   then
     clear
+    echo "DEBUG! (Please ignore)\n_MAXCHAR_NEW: $maxchar_new\n_MAXCHAR: $maxchar\nCheck: $check_checker"
+    line
     echo "Page $ia / $maxpage - Book $i"
     line
     page_to_write=${page_to_write//$'\r'}
