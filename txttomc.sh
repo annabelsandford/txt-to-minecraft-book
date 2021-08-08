@@ -33,7 +33,7 @@
 # Declarations >>
 
 author="Annabel Sandford" # Author of this abomination (me)
-progver="0.1.1" # Version number, also for the UI
+progver="0.1.2" # Version number, also for the UI
 progname="TXT to Minecraft Book & Quill" # Name of the script, for the UI
 usagedir=$HOME/Desktop/Bible # The working directory of this script. >> SAVE TXT's HERE <<
 usagedir_length=${#usagedir} # Count the length of working directory above. Needed later on.
@@ -217,6 +217,7 @@ textwork3() {
     check_checker=">> LETTER DET. / EXPANDING"
     while [[ "$next_char_check" =~ ^[0-9a-zA-Z]+$ ]]; do
       maxchar_new=$((maxchar_new+1))
+      worddetect=$((worddetect+1))
       check_checker=">> LETTER DET. / EXPANDING / WHILE"
       next_char_check=$(echo $entire_file | cut -c $maxchar_new)
     done
@@ -242,7 +243,7 @@ textwork3() {
     cliclick c:.
     # >> MINECRAFT WRITE PAGE APPLESCRIPT START
 
-    entire_file=${entire_file:$maxchar} # Delete them from the entire_file string
+    entire_file=${entire_file:$maxchar_new} # Delete them from the entire_file string
   else
     break
   fi
