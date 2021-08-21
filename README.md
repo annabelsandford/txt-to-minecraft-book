@@ -40,14 +40,17 @@ _The break_txt string is being used to check for an empty working directory. Onl
 ```bash
 break_txt="*.txt" # String I need in list() to determine empty directory
 ```
+***UPDATE 1.0.0:***
+Change values by using the settings / configuration tab within the script.
+To access the page, press "S" in the *.txt selection
 ~~_Minecraft's Maximum Character Cap per page (1.17.1). The script cuts the given *.txt files into pieces using maxchar. If Mojang decides to change the Character Cap per page you can update / adjust it here if not done already._~~
-~~```bash
-maxchar=255 # Maximum Character Cap per Page in Minecraft. Do not change.
-```~~
+```bash
+maxchar=266 # Maximum Character Cap per Page in Minecraft. Do not change.
+```
 ~~_Minecraft's Maximum Page Cap per book (1.17.1). The script cuts the given *.txt files into pieces using maxchar. If Mojang decides to change the Character Cap per page you can update / adjust it here if not done already._~~
-~~```bash
+```bash
 maxpage=999 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
-```~~
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
