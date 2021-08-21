@@ -28,20 +28,22 @@
 #             `
 # Written by Annabel Sandford (@annabellica / @joyeuserie) 2021
 # TXT to Minecraft Book & Quill Project
-# 0.0.1
+# 1.0.0
 
 # Declarations >>
 
 author="Annabel Sandford" # Author of this abomination (me)
-progver="0.1.2" # Version number, also for the UI
+progver="1.0.0" # Version number, also for the UI
 progname="TXT to Minecraft Book & Quill" # Name of the script, for the UI
 usagedir=$HOME/Desktop/Bible # The working directory of this script. >> SAVE TXT's HERE <<
+configfile=$usagedir/config.baq # Configuration File Path
 usagedir_length=${#usagedir} # Count the length of working directory above. Needed later on.
 usagedir_length=$((usagedir_length+2)) # Increment length from before because somehow it's wrong by 2. Don't ask me why.
+file_format=".txt" # Also self explanatory
 break_txt="*.txt" # String I need in list() to determine empty directory
 
-maxchar=200 # Maximum Character Cap per Page in Minecraft. Do not change.
-maxpage=35 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
+maxchar=230 # Maximum Character Cap per Page in Minecraft. Do not change.
+maxpage=100 # Maximum Page Cap per Book in Minecraft. Also don't change. Or do if you're feeling adventurous.
 start_timer=5 # Timer until script kicks in after initializing it
 bookmin=1 # Minimum of books a document can take up
 pagetotal=0 # Set variable to count for total pages later on. It'll make more sense later.
@@ -51,10 +53,82 @@ checkletters=[^a-zA-Z] # Letters for the Word Detection
 mousetimer=0 # I don't feel like explaining it
 worddetect=0 # Variable for Word Detection. Every time the script detects the character it's cutting off next is within a word, this goes up
 
-gcc -o MouseLocation MouseLocation.m -framework AppKit
-mkdir -p $usagedir #Check if folder exists, create if not
+mkdir -p $usagedir #Check if working directory exists, create if not
+
+if [[ ! -e $configfile ]]; then # after direcory check if config file exists
+    touch $configfile # if config file doesn't exit, create
+    echo $maxchar"\n"$maxpage"\n"$start_timer > $configfile # write variables to config file
+fi
+
+original_maxchar=$maxchar
+original_maxpage=$maxpage
+original_start_timer=$start_timer
 
 # Functions >>
+read_config() {
+  config_maxchar=`echo | awk 'NR==1 {print;exit}' $configfile`
+  config_maxpage=`echo | awk 'NR==2 {print;exit}' $configfile`
+  config_start_timer=`echo | awk 'NR==3 {print;exit}' $configfile`
+  maxchar=$config_maxchar
+  maxpage=$config_maxpage
+  start_timer=$config_start_timer
+}
+
+check_connection() {
+  echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
+
+  if [ $? -eq 0 ]; then
+      echo "Online"
+  else
+      echo "No Internet Connection."
+      exit
+  fi
+}
+
+prerequisites() {
+  clear
+  line
+  echo "Prerequisites Check (1/3)"
+  echo "Check for: Homebrew"
+  line
+  if [[ $(command -v brew) == "" ]]; then
+      echo "Installing Homebrew..."
+      /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  else
+      echo "Homebrew installed..."
+      sleep 0.5
+  fi
+  prerequisites_1
+}
+prerequisites_1() {
+  clear
+  line
+  echo "Prerequisites Check (2/3)"
+  echo "Check for: Cliclick"
+  line
+  if [[ $(command -v cliclick) == "" ]]; then
+      echo "Installing Cliclick..."
+      brew install cliclick
+  else
+      echo "Cliclick installed..."
+      sleep 0.5
+  fi
+  prerequisites_2
+}
+prerequisites_2() {
+  clear
+  line
+  echo "Prerequisites Check (3/3)"
+  echo "Check for: gnu-sed"
+  line
+  if [[ $(command -v gsed) == "" ]]; then
+      echo "Installing gnu-sed..."
+      brew install gnu-sed
+  else
+      echo "gnu-sed installed..."
+      sleep 0.5
+  fi
+}
 
 line() { # A function to create these lines because I can't be bothered to CMD+C / CMD+V this shit
   echo "==============================="
@@ -62,6 +136,98 @@ line() { # A function to create these lines because I can't be bothered to CMD+C
 
 newline() { # A function to create new lines because why not
   echo " "
+}
+
+settings() {
+  read_config
+  clear
+  echo "$progname $progver\nWritten by: $author"
+  line
+  echo "Loc: ../Start/Settings"
+  line
+  echo "Max. Character Value (Characters per Page):"
+  echo "_maxchar: "$maxchar
+  if [ "$maxchar" -ne "$original_maxchar" ]; then
+    echo "$(tput setaf 1)$(tput setab 7)>> CAUTION: Recommended value shall not exceed 230 characters$(tput sgr 0)"
+  fi
+  newline
+  echo "Max. Pages Value (Pages used per Book):"
+  echo "_maxpage: "$maxpage
+  if [ "$maxpage" -ne "$original_maxpage" ]; then
+    echo "$(tput setaf 1)$(tput setab 7)>> CAUTION: Recommended value shall not exceed 100 pages.$(tput sgr 0)"
+  fi
+  newline
+  echo "Start Timer Value (Timer until script starts writing):"
+  echo "_start: "$start_timer
+  if [ "$start_timer" -ne "$original_start_timer" ]; then
+    echo "$(tput setaf 1)$(tput setab 7)>> Original Value: $original_start_timer$(tput sgr 0)"
+  fi
+  newline
+  line
+  echo "1 to edit maxchar / 2 to edit maxpage / 3 to edit timer"
+  echo "Press C to go back / Enter 'reset' to reset values"
+  read settingsenter
+  settingsenter=$(echo $settingsenter | tr 'A-Z' 'a-z') # Convert user input into lowercase for accessibility
+  if [ "$settingsenter" = "c" ]; then # Check if userinput was C. If yes then..
+    list
+  elif [ "$settingsenter" = "1" ]; then # Check if userinput was 1. If yes then..
+    newline
+    echo "Enter new MaxChar value (old:) "$maxchar
+    read maxcharedit
+    maxcharedit="${maxcharedit//[[:space:]]/}"
+    if [[ $maxcharedit =~ ^[0-9]+$ ]]
+    then
+     echo ">> Valid ("$maxcharedit")"
+     gsed -i '1s/.*/'$maxcharedit'/' $configfile
+     sleep 1
+     settings
+    else
+     echo ">> Invalid"
+     sleep 2
+     settings
+    fi
+  elif [ "$settingsenter" = "2" ]; then # Check if userinput was 2. If yes then..
+  newline
+  echo "Enter new MaxPage value (old:) "$maxpage
+  read maxpageedit
+  maxpageedit="${maxpageedit//[[:space:]]/}"
+  if [[ $maxpageedit =~ ^[0-9]+$ ]]
+  then
+   echo ">> Valid ("$maxpageedit")"
+   gsed -i '2s/.*/'$maxpageedit'/' $configfile
+   sleep 1
+   settings
+  else
+   echo ">> Invalid"
+   sleep 2
+   settings
+  fi
+  elif [ "$settingsenter" = "3" ]; then # Check if userinput was 3. If yes then..
+  newline
+  echo "Enter new StartTimer value (old:) "$start_timer
+  read starttimeredit
+  starttimeredit="${starttimeredit//[[:space:]]/}"
+  if [[ $starttimeredit =~ ^[0-9]+$ ]]
+  then
+   echo ">> Valid ("$starttimeredit")"
+   gsed -i '3s/.*/'$starttimeredit'/' $configfile
+   sleep 1
+   settings
+  else
+   echo ">> Invalid"
+   sleep 2
+   settings
+ fi
+  elif [ "$settingsenter" = "reset" ]; then # Check if userinput was 3. If yes then..
+    gsed -i '1s/.*/230/' $configfile
+    gsed -i '2s/.*/100/' $configfile
+    gsed -i '3s/.*/5/' $configfile
+    echo ">> Reset Values"
+    sleep 1
+    settings
+  else
+    settings
+  fi
 }
 
 process_check() { # Get Minecraft Process ID (PID). Blatantly recycled from an old project of mine.
@@ -91,10 +257,13 @@ process_check() { # Get Minecraft Process ID (PID). Blatantly recycled from an o
 }
 
 list() { # List all files from working directory
+totalincrement=1
 clear
 echo "$progname $progver\nWritten by: $author"
 line
-echo "Files:"
+echo "Loc: ../Start"
+line
+echo "Text Files (.txt):\n"
   for entry in "$usagedir"/*.txt # for each TXT file in working directory
   do
     cut_entry=$(echo $entry | cut -c$usagedir_length-) # Cut off the directory path - Only leave file names.
@@ -102,20 +271,30 @@ echo "Files:"
     echo "There are no files."
     echo "Please move .txt files into $usagedir"
     newline
-    exit
+    exit # quit
   else # When there are files do...
-    echo "> $cut_entry"
+    echo "($totalincrement)> $cut_entry"
+    totalincrement=$((totalincrement + 1))
   fi
   done
+
   newline
   echo "Please enter filename (eg. test.txt) to continue"
-  echo "Alternatively enter C to quit"
+  echo "C to quit / R to reload / S to settings"
   read userfilename
   userfilename=$(echo $userfilename | tr 'A-Z' 'a-z') # Convert user input into lowercase for accessibility
   if [ "$userfilename" = "c" ]; then # Check if userinput was C. If yes then..
     echo "See ya!"
     exit # .. Quit.
+  elif [ "$userfilename" = "r" ]; then # If the input was R, go back to list() (reload)
+  echo "Reloading.."
+  sleep 0.5
+  list
+elif [ "$userfilename" = "s" ]; then # If the input was S, go back to settings()
+settings
   else
+    userfilename=${userfilename//$file_format/} # Remove potential file extention entered by user
+    userfilename=$userfilename$file_format # Append file extention
     textwork # If it wasn't C, continue.
   fi
 }
@@ -166,7 +345,7 @@ textwork2() {
   echo "$userfilename would take up $approx_pages pages."
   echo "$userfilename would need $approx_books books."
   newline
-  echo "Press Y to continue / Press C to abort"
+  echo "Press Y to continue / Press C to cancel"
   read textworkinput2 # Wait for user input (Preferably Y or C) we know the drill
   textworkinput2=$(echo $textworkinput2 | tr 'A-Z' 'a-z') # Convert user input into lowercase for accessibility. 3rd time.
   if [ "$textworkinput2" = "y" ]; then # If the input was Y, continue
@@ -183,16 +362,17 @@ textwork2() {
 textwork3() {
   entire_file="$(cat $compfile)" # Put the entire .txt file into a string
   entire_file=$(echo $entire_file | tr -d '\r') # Remove newlines because it fucks up the script yo
+  prev_books=$((i - 1))
   sleep 2
   for ((i=1;i<=approx_books;i++)); do # Until required amount of books is reached, do..
   clear # Clear screen and stuff
+  if [ "$i" -ne 1 ]; then
+    echo "WRITTEN BOOK: $prev_books"
+  fi
   echo "This is Book $i / $approx_books of $userfilename"
   line
   echo "Please open a Book & Quill. Place your cursor on the right page arrow."
-  echo "Press Y to continue / Press C to abort"
-  echo "DEBUG:"
-  echo "_MAXCHAR: $maxchar"
-  echo "_MAXCHAR_NEW: $maxchar_new"
+  echo "Press Y to continue / Press C to cancel"
   read textworkinput3 # Wait for user input
   textworkinput3=$(echo $textworkinput3 | tr 'A-Z' 'a-z') # Convert user input into lowercase.
   if [ "$textworkinput3" = "y" ]; then # input was Y, continue
@@ -281,6 +461,9 @@ book_fully_cooked_aye() {
 }
 
 # Start >>
+read_config
+clear
+prerequisites
 clear
 # process_check << DEBUG! Reactivate later. If I forgot to do it then I'm legally blind.
 list
